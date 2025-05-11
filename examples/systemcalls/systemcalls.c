@@ -127,12 +127,13 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     switch (kidpid = fork()) {
     case -1: perror("fork"); abort();
     case 0:
-        if (dup2(fd, 1) < 0) { perror("dup2"); abort(); }
+        if (dup2(fd, 1) < 0) { close(fd);perror("dup2"); abort(); }
         close(fd);
         execvp(command[0], command); perror("execvp"); abort();
     default:
         close(fd);
         /* do whatever the parent wants to do. */
+        waitpid(kidpid, NULL, 0);
     }
     va_end(args);
 
